@@ -24,16 +24,6 @@ final _darkTheme = {
   _Element.shadow: Colors.grey
 };
 
-final _weatherIcons = {
-  WeatherCondition.sunny: WeatherIcons.sunny,
-  WeatherCondition.windy: WeatherIcons.windy,
-  WeatherCondition.cloudy: WeatherIcons.cloudy,
-  WeatherCondition.foggy: WeatherIcons.fog,
-  WeatherCondition.rainy: WeatherIcons.rain,
-  WeatherCondition.thunderstorm: WeatherIcons.thunderstorm,
-  WeatherCondition.snowy: WeatherIcons.snow,
-};
-
 class BarClock extends StatefulWidget {
   const BarClock(this.model);
 
@@ -133,7 +123,7 @@ class _BarClockState extends State<BarClock> {
                 value: widget.model.temperatureString,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: _weatherIcons.entries.map((e) {
+                    children: WeatherIcons.conditions.entries.map((e) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(String.fromCharCode(e.value),
@@ -175,8 +165,9 @@ class BarPainter extends CustomPainter {
     canvas.drawArc(base, angle, sweep, false, paint);
     canvas.save();
     canvas.translate(halfWidth, halfWidth);
-    final steps = 24 * 4 + 1;
+    final steps = 24 * 4;
     canvas.rotate(-0.25 * pi);
+    canvas.rotate(sweep / steps / 2);
     for (var step in Iterable.generate(steps)) {
       if (step % 4 == 0) {
         paint.color = Colors.white;
@@ -225,5 +216,15 @@ class WeatherIcons {
     rain: Colors.yellow,
     thunderstorm: Colors.red,
     snow: Colors.red
+  };
+
+  static const conditions = {
+    WeatherCondition.sunny: WeatherIcons.sunny,
+    WeatherCondition.windy: WeatherIcons.windy,
+    WeatherCondition.cloudy: WeatherIcons.cloudy,
+    WeatherCondition.foggy: WeatherIcons.fog,
+    WeatherCondition.rainy: WeatherIcons.rain,
+    WeatherCondition.thunderstorm: WeatherIcons.thunderstorm,
+    WeatherCondition.snowy: WeatherIcons.snow,
   };
 }
