@@ -1,0 +1,26 @@
+name: bar_clock
+description: A clock with a bar showing the elapsed time of the day in the style of the S2000 rev meter.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_clock_helper:
+    path: ../flutter_clock_helper
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: DSEG
+      fonts:
+        - asset: third_party/DSEG7Modern-Bold.ttf
+    - family: weather
+      fonts:
+        - asset: third_party/weathericons.ttf
