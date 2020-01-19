@@ -76,80 +76,77 @@ class _BarClockState extends State<BarClock> {
 
     return Container(
       color: Colors.black,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Stack(
-          alignment: AlignmentDirectional.center,
-          children: [
-            Align(
-              alignment: AlignmentDirectional.topCenter,
-              child: AspectRatio(
-                  aspectRatio: 2,
-                  child: CustomPaint(
-                      painter: BarPainter(
-                          _dateTime, MediaQuery.of(context).size.height / 7))),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Semantics(
-                  label: 'Today is $semanticDate',
-                  value: semanticDate,
-                  child: Text(date,
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.topCenter,
+            child: AspectRatio(
+                aspectRatio: 10,
+                child: CustomPaint(
+                    painter: BarPainter(
+                        _dateTime, MediaQuery.of(context).size.height / 7))),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Semantics(
+                label: 'Today is $semanticDate',
+                value: semanticDate,
+                child: Text(date,
+                    style: TextStyle(
+                        fontFamily: segmentFont,
+                        fontSize: smallFontSize,
+                        color: Colors.orange)),
+              ),
+              Semantics(
+                label: 'The time is $time',
+                value: time,
+                child: Stack(children: [
+                  Text('88:88:88',
                       style: TextStyle(
+                          fontSize: bigFontSize,
                           fontFamily: segmentFont,
-                          fontSize: smallFontSize,
+                          color: Colors.orange.withOpacity(0.2))),
+                  Text(time,
+                      style: TextStyle(
+                          fontSize: bigFontSize,
+                          fontFamily: segmentFont,
                           color: Colors.orange)),
-                ),
-                Semantics(
-                  label: 'The time is $time',
-                  value: time,
-                  child: Stack(children: [
-                    Text('88:88:88',
-                        style: TextStyle(
-                            fontSize: bigFontSize,
-                            fontFamily: segmentFont,
-                            color: Colors.orange.withOpacity(0.2))),
-                    Text(time,
-                        style: TextStyle(
-                            fontSize: bigFontSize,
-                            fontFamily: segmentFont,
-                            color: Colors.orange)),
-                  ]),
-                ),
-              ],
-            ),
-            Semantics(
-              label: 'It is ${widget.model.weatherString} '
-                  'at a temperature of ${widget.model.temperatureString}',
-              value: widget.model.temperatureString,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: FractionallySizedBox(
-                        widthFactor: 0.5,
-                        child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8),
-                                    child: SizedBox(
-                                      height: smallFontSize,
-                                      child: CustomPaint(
-                                          painter: TemperatureBarPainter(
-                                              widget.model.low,
-                                              widget.model.high,
-                                              widget.model.temperature,
-                                              widget.model.unitString)),
-                                    )),
+                ]),
+              ),
+            ],
+          ),
+          Semantics(
+            label: 'It is ${widget.model.weatherString} '
+                'at a temperature of ${widget.model.temperatureString}',
+            value: widget.model.temperatureString,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: FractionallySizedBox(
+                      widthFactor: 0.5,
+                      child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: smallFontSize,
+                                child: CustomPaint(
+                                    painter: TemperatureBarPainter(
+                                        widget.model.low,
+                                        widget.model.high,
+                                        widget.model.temperature,
+                                        widget.model.unitString)),
                               ),
-                            ])),
-                  ),
-                  Row(
+                            ),
+                          ])),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: WeatherIcons.conditions.entries.map((e) {
                         final active = widget.model.weatherCondition == e.key;
@@ -162,8 +159,8 @@ class _BarClockState extends State<BarClock> {
                                       width: 2, color: color.withOpacity(0.4)),
                                   borderRadius: BorderRadius.circular(8))),
                           child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 9,
-                            height: MediaQuery.of(context).size.width / 12,
+                            width: MediaQuery.of(context).size.width / 10,
+                            height: MediaQuery.of(context).size.width / 16,
                             child: Center(
                               child: Text(String.fromCharCode(e.value),
                                   style: TextStyle(
@@ -176,11 +173,11 @@ class _BarClockState extends State<BarClock> {
                           ),
                         );
                       }).toList()),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -200,6 +197,7 @@ class TemperatureBarPainter extends CustomPainter {
       ..color = Colors.red.withOpacity(0.7)
       ..style = PaintingStyle.fill;
     final textHeight = size.height * 0.7;
+    const textOffset = 8;
     final lowText = TextPainter(
         text: TextSpan(
             text: '${low.round()}$unit',
@@ -210,8 +208,8 @@ class TemperatureBarPainter extends CustomPainter {
         textAlign: TextAlign.center,
         textDirection: ui.TextDirection.ltr)
       ..layout();
-    lowText.paint(
-        canvas, Offset(-lowText.width - 4, (size.height - textHeight) / 2));
+    lowText.paint(canvas,
+        Offset(-lowText.width - textOffset, (size.height - textHeight) / 2));
     final highText = TextPainter(
         text: TextSpan(
             text: '${high.round()}$unit',
@@ -222,8 +220,8 @@ class TemperatureBarPainter extends CustomPainter {
         textAlign: TextAlign.center,
         textDirection: ui.TextDirection.ltr)
       ..layout();
-    highText.paint(
-        canvas, Offset(size.width + 4, (size.height - textHeight) / 2));
+    highText.paint(canvas,
+        Offset(size.width + textOffset, (size.height - textHeight) / 2));
 
     _drawBar(canvas, size, paint);
     canvas.clipRect(Rect.fromLTWH(
@@ -263,7 +261,7 @@ class BarPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.butt
       ..color = Colors.red.withOpacity(0.7);
-    final base = Rect.fromLTRB(0, 0, size.width, size.width);
+    final base = Rect.fromLTWH(0, barWidth / 2, size.width, size.width);
     const sweep = pi * 0.7;
     const angle = pi * 1.5 - sweep / 2;
     const segmentWidth = 0.5;
@@ -272,13 +270,13 @@ class BarPainter extends CustomPainter {
     for (var step in Iterable<int>.generate(steps)) {
       if (step % 8 == 0) {
         canvas.save();
-        canvas.translate(halfWidth, halfWidth);
+        canvas.translate(halfWidth, halfWidth + barWidth / 2);
         canvas.rotate(
             angle + pi * 0.5 + (segmentWidth / 2 + step) * sweep / steps);
         paint.color = Colors.white;
         final textPainter = TextPainter(
             text: TextSpan(
-                text: '${step ~/ 4}', style: const TextStyle(fontSize: 12)),
+                text: '${step ~/ 4}', style: TextStyle(fontSize: barWidth / 3)),
             textAlign: TextAlign.center,
             textDirection: ui.TextDirection.ltr);
         textPainter.layout();

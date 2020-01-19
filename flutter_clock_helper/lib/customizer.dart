@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'model.dart';
 
@@ -39,7 +40,7 @@ class ClockCustomizer extends StatefulWidget {
 
 class _ClockCustomizerState extends State<ClockCustomizer> {
   final _model = ClockModel();
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.dark;
   bool _configButtonShown = false;
 
   @override
@@ -187,6 +188,7 @@ class _ClockCustomizerState extends State<ClockCustomizer> {
         ),
       ),
     );
+    SystemChrome.setEnabledSystemUIOverlays([]);
 
     return MaterialApp(
       theme: ThemeData.light(),
@@ -196,28 +198,26 @@ class _ClockCustomizerState extends State<ClockCustomizer> {
       home: Scaffold(
         resizeToAvoidBottomPadding: false,
         endDrawer: _configDrawer(context),
-        body: SafeArea(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              setState(() {
-                _configButtonShown = !_configButtonShown;
-              });
-            },
-            child: Stack(
-              children: [
-                clock,
-                if (_configButtonShown)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Opacity(
-                      opacity: 0.7,
-                      child: _configButton(),
-                    ),
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              _configButtonShown = !_configButtonShown;
+            });
+          },
+          child: Stack(
+            children: [
+              clock,
+              if (_configButtonShown)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Opacity(
+                    opacity: 0.7,
+                    child: _configButton(),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),

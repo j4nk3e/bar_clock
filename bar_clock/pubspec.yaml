@@ -1,5 +1,5 @@
 name: bar_clock
-description: A clock with a bar showing the elapsed time of the day in the style of the S2000 rev meter.
+description: "A digital clock based on the look and feel of the HMI of a retro sports car."
 version: 1.0.0+1
 
 environment:
