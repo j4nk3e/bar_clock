@@ -57,7 +57,8 @@ class _BarClockState extends State<BarClock> {
     setState(() {
       _dateTime = DateTime.now();
       _timer = Timer(
-        Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
+        const Duration(seconds: 1) -
+            Duration(milliseconds: _dateTime.millisecond),
         _updateTime,
       );
     });
@@ -199,7 +200,7 @@ class TemperatureBarPainter extends CustomPainter {
       ..color = Colors.red.withOpacity(0.7)
       ..style = PaintingStyle.fill;
     final textHeight = size.height * 0.7;
-    var lowText = TextPainter(
+    final lowText = TextPainter(
         text: TextSpan(
             text: '${low.round()}$unit',
             style: TextStyle(
@@ -211,12 +212,12 @@ class TemperatureBarPainter extends CustomPainter {
       ..layout();
     lowText.paint(
         canvas, Offset(-lowText.width - 4, (size.height - textHeight) / 2));
-    var highText = TextPainter(
+    final highText = TextPainter(
         text: TextSpan(
             text: '${high.round()}$unit',
             style: TextStyle(
                 color: Colors.redAccent,
-                fontSize: textHeight, 
+                fontSize: textHeight,
                 fontFamily: segmentFont)),
         textAlign: TextAlign.center,
         textDirection: ui.TextDirection.ltr)
@@ -235,19 +236,17 @@ class TemperatureBarPainter extends CustomPainter {
 
   void _drawBar(Canvas canvas, Size size, Paint paint) {
     canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(2)),
+        RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height),
+            const Radius.circular(2)),
         paint);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-    // final oldPainter = oldDelegate as TemperatureBarPainter;
-    // return oldPainter.low != low ||
-    //     oldPainter.high != high ||
-    //     oldPainter.current != current;
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) =>
+      !(oldDelegate is TemperatureBarPainter &&
+          oldDelegate.low == low &&
+          oldDelegate.high != high &&
+          oldDelegate.current != current);
 }
 
 class BarPainter extends CustomPainter {
@@ -265,21 +264,21 @@ class BarPainter extends CustomPainter {
       ..strokeCap = StrokeCap.butt
       ..color = Colors.red.withOpacity(0.7);
     final base = Rect.fromLTRB(0, 0, size.width, size.width);
-    final sweep = pi * 0.7;
-    var angle = pi * 1.5 - sweep / 2;
-    final segmentWidth = 0.5;
-    final steps = 24 * 4;
+    const sweep = pi * 0.7;
+    const angle = pi * 1.5 - sweep / 2;
+    const segmentWidth = 0.5;
+    const steps = 24 * 4;
     canvas.drawArc(base, angle, sweep, false, paint);
-    for (var step in Iterable.generate(steps)) {
+    for (var step in Iterable<int>.generate(steps)) {
       if (step % 8 == 0) {
         canvas.save();
         canvas.translate(halfWidth, halfWidth);
         canvas.rotate(
             angle + pi * 0.5 + (segmentWidth / 2 + step) * sweep / steps);
         paint.color = Colors.white;
-        var textPainter = TextPainter(
-            text:
-                TextSpan(text: '${step ~/ 4}', style: TextStyle(fontSize: 12)),
+        final textPainter = TextPainter(
+            text: TextSpan(
+                text: '${step ~/ 4}', style: const TextStyle(fontSize: 12)),
             textAlign: TextAlign.center,
             textDirection: ui.TextDirection.ltr);
         textPainter.layout();
@@ -304,8 +303,9 @@ class BarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) =>
-      (oldDelegate as BarPainter).dateTime != dateTime ||
-      (oldDelegate as BarPainter).barWidth != barWidth;
+      !(oldDelegate is BarPainter &&
+          oldDelegate.dateTime == dateTime &&
+          oldDelegate.barWidth != barWidth);
 }
 
 class WeatherIcons {
