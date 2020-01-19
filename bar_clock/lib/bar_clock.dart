@@ -12,12 +12,6 @@ enum _Element {
   shadow,
 }
 
-final _lightTheme = {
-  _Element.background: Colors.white,
-  _Element.text: Colors.black,
-  _Element.shadow: Colors.grey,
-};
-
 final _darkTheme = {
   _Element.background: Colors.black,
   _Element.text: Colors.white,
@@ -34,6 +28,7 @@ class BarClock extends StatefulWidget {
 }
 
 class _BarClockState extends State<BarClock> {
+  static const segmentFont = 'DSEG';
   DateTime _dateTime = DateTime.now();
   Timer _timer;
 
@@ -89,53 +84,84 @@ class _BarClockState extends State<BarClock> {
     final minute = DateFormat('mm').format(_dateTime);
     final second = DateFormat('ss').format(_dateTime);
     final date = DateFormat.yMMMEd().format(_dateTime);
-    final weatherMeta =
-        'It is ${widget.model.weatherString} at ${widget.model.temperatureString}';
     final barHeight = MediaQuery.of(context).size.height / 7;
     final textStyle =
         TextStyle(color: colors[_Element.text], fontSize: barHeight);
 
     return Container(
       color: colors[_Element.background],
-      child: Center(
-        child: DefaultTextStyle(
-          style: textStyle,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
+      child: DefaultTextStyle(
+        style: textStyle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Stack(
+            alignment: AlignmentDirectional.center,
             children: <Widget>[
-              AspectRatio(
-                  aspectRatio: 8,
-                  child: CustomPaint(painter: BarPainter(_dateTime))),
-              Stack(children: [
-                Text('88:88:88',
-                    style: TextStyle(
-                        fontFamily: 'DSEG',
-                        color: Colors.orange.withOpacity(0.4))),
-                Text('$hour:$minute:$second',
-                    style: TextStyle(fontFamily: 'DSEG', color: Colors.orange)),
-              ]),
-              Text('$date',
-                  style: TextStyle(
-                      fontFamily: 'DSEG', fontSize: 16, color: Colors.orange)),
-              Semantics(
-                label: weatherMeta,
-                value: widget.model.temperatureString,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: WeatherIcons.conditions.entries.map((e) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(String.fromCharCode(e.value),
-                            textScaleFactor: 1,
-                            style: TextStyle(
-                                fontFamily: 'weather',
-                                fontSize: 28,
-                                color: widget.model.weatherCondition == e.key
-                                    ? WeatherIcons.colors[e.value]
-                                    : Colors.white.withOpacity(0.6))),
-                      );
-                    }).toList()),
+              Align(
+                alignment: AlignmentDirectional.topCenter,
+                child: AspectRatio(
+                    aspectRatio: 2,
+                    child: CustomPaint(painter: BarPainter(_dateTime))),
+              ),
+              Align(
+                alignment: AlignmentDirectional.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Stack(children: [
+                      Text('88:88:88',
+                          style: TextStyle(
+                              fontFamily: segmentFont,
+                              color: Colors.orange.withOpacity(0.2))),
+                      Text('$hour:$minute:$second',
+                          style: TextStyle(
+                              fontFamily: segmentFont, color: Colors.orange)),
+                    ]),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Text('$date',
+                          style: TextStyle(
+                              fontFamily: segmentFont,
+                              fontSize: 16,
+                              color: Colors.orange)),
+                    ),
+                  ],
+                ),
+              ),
+              Align(
+                alignment: AlignmentDirectional.bottomCenter,
+                child: Semantics(
+                  label: 'It is ${widget.model.weatherString} '
+                      'at a temperature of ${widget.model.temperatureString}',
+                  value: widget.model.temperatureString,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: WeatherIcons.conditions.entries.map((e) {
+                        final active = widget.model.weatherCondition == e.key;
+                        final color = WeatherIcons.colors[e.value];
+                        return DecoratedBox(
+                          decoration: ShapeDecoration(
+                              color: active ? color : Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      width: 2, color: color.withOpacity(0.4)),
+                                  borderRadius: BorderRadius.circular(8))),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width / 9,
+                            height: MediaQuery.of(context).size.width / 12,
+                            child: Center(
+                              child: Text(String.fromCharCode(e.value),
+                                  style: TextStyle(
+                                      fontSize: 28,
+                                      fontFamily: 'weather',
+                                      color: active
+                                          ? Colors.black
+                                          : color.withOpacity(0.4))),
+                            ),
+                          ),
+                        );
+                      }).toList()),
+                ),
               ),
             ],
           ),
