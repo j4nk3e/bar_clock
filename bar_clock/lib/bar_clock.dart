@@ -15,10 +15,10 @@ class BarClock extends StatefulWidget {
   _BarClockState createState() => _BarClockState();
 }
 
-class _BarClockState extends State<BarClock> {
-  static const segmentFont = 'DSEG';
-  static const weatherIconFont = 'weather';
+const segmentFont = 'DSEG';
+const weatherIconFont = 'weather';
 
+class _BarClockState extends State<BarClock> {
   DateTime _dateTime = DateTime.now();
   Timer _timer;
 
@@ -71,6 +71,7 @@ class _BarClockState extends State<BarClock> {
         DateFormat('${widget.model.is24HourFormat ? 'HH' : 'hh'}:mm:ss')
             .format(_dateTime);
     final date = DateFormat.yMMMEd().format(_dateTime);
+    final semanticDate = DateFormat.yMMMMEEEEd().format(_dateTime);
 
     return Container(
       color: Colors.black,
@@ -78,7 +79,7 @@ class _BarClockState extends State<BarClock> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Stack(
           alignment: AlignmentDirectional.center,
-          children: <Widget>[
+          children: [
             Align(
               alignment: AlignmentDirectional.topCenter,
               child: AspectRatio(
@@ -87,77 +88,165 @@ class _BarClockState extends State<BarClock> {
                       painter: BarPainter(
                           _dateTime, MediaQuery.of(context).size.height / 7))),
             ),
-            Align(
-              alignment: AlignmentDirectional.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(date,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Semantics(
+                  label: 'Today is $semanticDate',
+                  value: semanticDate,
+                  child: Text(date,
+                      style: TextStyle(
+                          fontFamily: segmentFont,
+                          fontSize: smallFontSize,
+                          color: Colors.orange)),
+                ),
+                Semantics(
+                  label: 'The time is $time',
+                  value: time,
+                  child: Stack(children: [
+                    Text('88:88:88',
                         style: TextStyle(
+                            fontSize: bigFontSize,
                             fontFamily: segmentFont,
-                            fontSize: smallFontSize,
+                            color: Colors.orange.withOpacity(0.2))),
+                    Text(time,
+                        style: TextStyle(
+                            fontSize: bigFontSize,
+                            fontFamily: segmentFont,
                             color: Colors.orange)),
-                  ),
-                  Semantics(
-                    label: ' ',
-                    value: time,
-                    child: Stack(children: [
-                      Text('88:88:88',
-                          style: TextStyle(
-                              fontSize: bigFontSize,
-                              fontFamily: segmentFont,
-                              color: Colors.orange.withOpacity(0.2))),
-                      Text(time,
-                          style: TextStyle(
-                              fontSize: bigFontSize,
-                              fontFamily: segmentFont,
-                              color: Colors.orange)),
-                    ]),
-                  ),
-                ],
-              ),
+                  ]),
+                ),
+              ],
             ),
-            Align(
-              alignment: AlignmentDirectional.bottomCenter,
-              child: Semantics(
-                label: 'It is ${widget.model.weatherString} '
-                    'at a temperature of ${widget.model.temperatureString}',
-                value: widget.model.temperatureString,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: WeatherIcons.conditions.entries.map((e) {
-                      final active = widget.model.weatherCondition == e.key;
-                      final color = WeatherIcons.colors[e.value];
-                      return DecoratedBox(
-                        decoration: ShapeDecoration(
-                            color: active ? color : Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    width: 2, color: color.withOpacity(0.4)),
-                                borderRadius: BorderRadius.circular(8))),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width / 9,
-                          height: MediaQuery.of(context).size.width / 12,
-                          child: Center(
-                            child: Text(String.fromCharCode(e.value),
-                                style: TextStyle(
-                                    fontSize: smallFontSize,
-                                    fontFamily: weatherIconFont,
-                                    color: active
-                                        ? Colors.black
-                                        : color.withOpacity(0.4))),
+            Semantics(
+              label: 'It is ${widget.model.weatherString} '
+                  'at a temperature of ${widget.model.temperatureString}',
+              value: widget.model.temperatureString,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: FractionallySizedBox(
+                        widthFactor: 0.5,
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: SizedBox(
+                                      height: smallFontSize,
+                                      child: CustomPaint(
+                                          painter: TemperatureBarPainter(
+                                              widget.model.low,
+                                              widget.model.high,
+                                              widget.model.temperature,
+                                              widget.model.unitString)),
+                                    )),
+                              ),
+                            ])),
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: WeatherIcons.conditions.entries.map((e) {
+                        final active = widget.model.weatherCondition == e.key;
+                        final color = WeatherIcons.colors[e.value];
+                        return DecoratedBox(
+                          decoration: ShapeDecoration(
+                              color: active ? color : Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      width: 2, color: color.withOpacity(0.4)),
+                                  borderRadius: BorderRadius.circular(8))),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width / 9,
+                            height: MediaQuery.of(context).size.width / 12,
+                            child: Center(
+                              child: Text(String.fromCharCode(e.value),
+                                  style: TextStyle(
+                                      fontSize: smallFontSize,
+                                      fontFamily: weatherIconFont,
+                                      color: active
+                                          ? Colors.black
+                                          : color.withOpacity(0.4))),
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList()),
+                        );
+                      }).toList()),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class TemperatureBarPainter extends CustomPainter {
+  final num low;
+  final num high;
+  final num current;
+  final String unit;
+
+  TemperatureBarPainter(this.low, this.high, this.current, this.unit);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.red.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
+    final textHeight = size.height * 0.7;
+    var lowText = TextPainter(
+        text: TextSpan(
+            text: '${low.round()}$unit',
+            style: TextStyle(
+                color: Colors.blueAccent,
+                fontSize: textHeight,
+                fontFamily: segmentFont)),
+        textAlign: TextAlign.center,
+        textDirection: ui.TextDirection.ltr)
+      ..layout();
+    lowText.paint(
+        canvas, Offset(-lowText.width - 4, (size.height - textHeight) / 2));
+    var highText = TextPainter(
+        text: TextSpan(
+            text: '${high.round()}$unit',
+            style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: textHeight, 
+                fontFamily: segmentFont)),
+        textAlign: TextAlign.center,
+        textDirection: ui.TextDirection.ltr)
+      ..layout();
+    highText.paint(
+        canvas, Offset(size.width + 4, (size.height - textHeight) / 2));
+
+    _drawBar(canvas, size, paint);
+    canvas.clipRect(Rect.fromLTWH(
+        0,
+        0,
+        high > low ? size.width * (current - low) / (high - low) : 0,
+        size.height));
+    _drawBar(canvas, size, paint..color = Colors.yellow);
+  }
+
+  void _drawBar(Canvas canvas, Size size, Paint paint) {
+    canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, 0, size.width, size.height), Radius.circular(2)),
+        paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+    // final oldPainter = oldDelegate as TemperatureBarPainter;
+    // return oldPainter.low != low ||
+    //     oldPainter.high != high ||
+    //     oldPainter.current != current;
   }
 }
 
@@ -200,23 +289,23 @@ class BarPainter extends CustomPainter {
             Offset(0, -halfWidth + halfBar + 4), paint..strokeWidth = 1);
         canvas.restore();
       }
-      if (step % 4 == 0) {
-        paint.color = Colors.yellow;
-      } else {
-        paint.color = Colors.yellow.withOpacity(0.8);
-      }
       if (dateTime.hour * 60 + dateTime.minute >= step * 15) {
-        canvas.drawArc(base, angle + step * sweep / steps,
-            sweep / steps * segmentWidth, false, paint..strokeWidth = barWidth);
+        final bold = step % 4 == 0;
+        paint.color = bold ? Colors.yellow : Colors.yellow.withOpacity(0.8);
+        canvas.drawArc(
+            base,
+            angle + (bold ? (step - 0.05) : step) * sweep / steps,
+            (bold ? 1.2 : 1) * sweep / steps * segmentWidth,
+            false,
+            paint..strokeWidth = barWidth);
       }
     }
-    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(CustomPainter oldDelegate) =>
+      (oldDelegate as BarPainter).dateTime != dateTime ||
+      (oldDelegate as BarPainter).barWidth != barWidth;
 }
 
 class WeatherIcons {
