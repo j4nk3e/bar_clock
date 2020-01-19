@@ -6,18 +6,6 @@ import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-enum _Element {
-  background,
-  text,
-  shadow,
-}
-
-final _darkTheme = {
-  _Element.background: Colors.black,
-  _Element.text: Colors.white,
-  _Element.shadow: Colors.grey
-};
-
 class BarClock extends StatefulWidget {
   const BarClock(this.model);
 
@@ -29,6 +17,8 @@ class BarClock extends StatefulWidget {
 
 class _BarClockState extends State<BarClock> {
   static const segmentFont = 'DSEG';
+  static const weatherIconFont = 'weather';
+
   DateTime _dateTime = DateTime.now();
   Timer _timer;
 
@@ -75,96 +65,94 @@ class _BarClockState extends State<BarClock> {
 
   @override
   Widget build(BuildContext context) {
-    final colors =
-        //  Theme.of(context).brightness == Brightness.light
-        //     ? _lightTheme :
-        _darkTheme;
-    final hour =
-        DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
-    final minute = DateFormat('mm').format(_dateTime);
-    final second = DateFormat('ss').format(_dateTime);
+    final bigFontSize = MediaQuery.of(context).size.height / 6;
+    final smallFontSize = MediaQuery.of(context).size.height / 16;
+    final time =
+        DateFormat('${widget.model.is24HourFormat ? 'HH' : 'hh'}:mm:ss')
+            .format(_dateTime);
     final date = DateFormat.yMMMEd().format(_dateTime);
-    final barHeight = MediaQuery.of(context).size.height / 7;
-    final textStyle =
-        TextStyle(color: colors[_Element.text], fontSize: barHeight);
 
     return Container(
-      color: colors[_Element.background],
-      child: DefaultTextStyle(
-        style: textStyle,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Stack(
-            alignment: AlignmentDirectional.center,
-            children: <Widget>[
-              Align(
-                alignment: AlignmentDirectional.topCenter,
-                child: AspectRatio(
-                    aspectRatio: 2,
-                    child: CustomPaint(painter: BarPainter(_dateTime))),
-              ),
-              Align(
-                alignment: AlignmentDirectional.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Stack(children: [
+      color: Colors.black,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Stack(
+          alignment: AlignmentDirectional.center,
+          children: <Widget>[
+            Align(
+              alignment: AlignmentDirectional.topCenter,
+              child: AspectRatio(
+                  aspectRatio: 2,
+                  child: CustomPaint(painter: BarPainter(_dateTime))),
+            ),
+            Align(
+              alignment: AlignmentDirectional.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text(date,
+                        style: TextStyle(
+                            fontFamily: segmentFont,
+                            fontSize: smallFontSize,
+                            color: Colors.orange)),
+                  ),
+                  Semantics(
+                    label: ' ',
+                    value: time,
+                    child: Stack(children: [
                       Text('88:88:88',
                           style: TextStyle(
+                              fontSize: bigFontSize,
                               fontFamily: segmentFont,
                               color: Colors.orange.withOpacity(0.2))),
-                      Text('$hour:$minute:$second',
+                      Text(time,
                           style: TextStyle(
-                              fontFamily: segmentFont, color: Colors.orange)),
-                    ]),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text('$date',
-                          style: TextStyle(
+                              fontSize: bigFontSize,
                               fontFamily: segmentFont,
-                              fontSize: 16,
                               color: Colors.orange)),
-                    ),
-                  ],
-                ),
+                    ]),
+                  ),
+                ],
               ),
-              Align(
-                alignment: AlignmentDirectional.bottomCenter,
-                child: Semantics(
-                  label: 'It is ${widget.model.weatherString} '
-                      'at a temperature of ${widget.model.temperatureString}',
-                  value: widget.model.temperatureString,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: WeatherIcons.conditions.entries.map((e) {
-                        final active = widget.model.weatherCondition == e.key;
-                        final color = WeatherIcons.colors[e.value];
-                        return DecoratedBox(
-                          decoration: ShapeDecoration(
-                              color: active ? color : Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      width: 2, color: color.withOpacity(0.4)),
-                                  borderRadius: BorderRadius.circular(8))),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 9,
-                            height: MediaQuery.of(context).size.width / 12,
-                            child: Center(
-                              child: Text(String.fromCharCode(e.value),
-                                  style: TextStyle(
-                                      fontSize: 28,
-                                      fontFamily: 'weather',
-                                      color: active
-                                          ? Colors.black
-                                          : color.withOpacity(0.4))),
-                            ),
+            ),
+            Align(
+              alignment: AlignmentDirectional.bottomCenter,
+              child: Semantics(
+                label: 'It is ${widget.model.weatherString} '
+                    'at a temperature of ${widget.model.temperatureString}',
+                value: widget.model.temperatureString,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: WeatherIcons.conditions.entries.map((e) {
+                      final active = widget.model.weatherCondition == e.key;
+                      final color = WeatherIcons.colors[e.value];
+                      return DecoratedBox(
+                        decoration: ShapeDecoration(
+                            color: active ? color : Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    width: 2, color: color.withOpacity(0.4)),
+                                borderRadius: BorderRadius.circular(8))),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width / 9,
+                          height: MediaQuery.of(context).size.width / 12,
+                          child: Center(
+                            child: Text(String.fromCharCode(e.value),
+                                style: TextStyle(
+                                    fontSize: smallFontSize,
+                                    fontFamily: weatherIconFont,
+                                    color: active
+                                        ? Colors.black
+                                        : color.withOpacity(0.4))),
                           ),
-                        );
-                      }).toList()),
-                ),
+                        ),
+                      );
+                    }).toList()),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
