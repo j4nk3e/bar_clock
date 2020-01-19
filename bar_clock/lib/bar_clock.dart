@@ -83,7 +83,9 @@ class _BarClockState extends State<BarClock> {
               alignment: AlignmentDirectional.topCenter,
               child: AspectRatio(
                   aspectRatio: 2,
-                  child: CustomPaint(painter: BarPainter(_dateTime))),
+                  child: CustomPaint(
+                      painter: BarPainter(
+                          _dateTime, MediaQuery.of(context).size.height / 7))),
             ),
             Align(
               alignment: AlignmentDirectional.center,
@@ -161,11 +163,11 @@ class _BarClockState extends State<BarClock> {
 
 class BarPainter extends CustomPainter {
   final DateTime dateTime;
-  BarPainter(this.dateTime);
+  final double barWidth;
+  BarPainter(this.dateTime, this.barWidth);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final barWidth = 52.0;
     final halfWidth = size.width / 2;
     final halfBar = barWidth / 2;
     final paint = Paint()
@@ -174,19 +176,21 @@ class BarPainter extends CustomPainter {
       ..strokeCap = StrokeCap.butt
       ..color = Colors.red.withOpacity(0.7);
     final base = Rect.fromLTRB(0, 0, size.width, size.width);
-    var angle = pi * 1.25;
-    final sweep = pi * 0.5;
-    canvas.drawArc(base, angle, sweep, false, paint);
-    canvas.save();
-    canvas.translate(halfWidth, halfWidth);
+    final sweep = pi * 0.7;
+    var angle = pi * 1.5 - sweep / 2;
+    final segmentWidth = 0.5;
     final steps = 24 * 4;
-    canvas.rotate(-0.25 * pi);
-    canvas.rotate(sweep / steps / 2);
+    canvas.drawArc(base, angle, sweep, false, paint);
     for (var step in Iterable.generate(steps)) {
-      if (step % 4 == 0) {
+      if (step % 8 == 0) {
+        canvas.save();
+        canvas.translate(halfWidth, halfWidth);
+        canvas.rotate(
+            angle + pi * 0.5 + (segmentWidth / 2 + step) * sweep / steps);
         paint.color = Colors.white;
         var textPainter = TextPainter(
-            text: TextSpan(text: '${step ~/ 4}'),
+            text:
+                TextSpan(text: '${step ~/ 4}', style: TextStyle(fontSize: 12)),
             textAlign: TextAlign.center,
             textDirection: ui.TextDirection.ltr);
         textPainter.layout();
@@ -194,15 +198,17 @@ class BarPainter extends CustomPainter {
             canvas, Offset(-textPainter.width / 2, -halfWidth + halfBar + 4));
         canvas.drawLine(Offset(0, -halfWidth + halfBar),
             Offset(0, -halfWidth + halfBar + 4), paint..strokeWidth = 1);
+        canvas.restore();
+      }
+      if (step % 4 == 0) {
         paint.color = Colors.yellow;
       } else {
         paint.color = Colors.yellow.withOpacity(0.8);
       }
       if (dateTime.hour * 60 + dateTime.minute >= step * 15) {
-        canvas.drawLine(Offset(0, -halfWidth + halfBar),
-            Offset(0, -halfWidth - halfBar), paint..strokeWidth = 3);
+        canvas.drawArc(base, angle + step * sweep / steps,
+            sweep / steps * segmentWidth, false, paint..strokeWidth = barWidth);
       }
-      canvas.rotate(sweep / steps);
     }
     canvas.restore();
   }
